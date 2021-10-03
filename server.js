@@ -2,6 +2,8 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
+const http = require('http')
+const { Server } = require('socket.io')
 
 // require route files
 const exampleRoutes = require('./app/routes/example_routes')
@@ -22,6 +24,7 @@ const auth = require('./lib/auth')
 // used for cors and local port declaration
 const serverDevPort = 4741
 const clientDevPort = 7165
+
 
 // establish database connection
 // use new version of URL parser
@@ -67,6 +70,22 @@ app.use(errorHandler)
 // run API on designated port (4741 in this case)
 app.listen(port, () => {
   console.log('listening on port ' + port)
+})
+
+const server = http.createServer(app)
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:7165',
+    methods: ['GET', 'POST']
+  }
+})
+
+io.on('connection', (socket) => {
+  console.log(socket.id)
+
+  socket.on('disconnect', () => {
+    console.log('User Disconnected', socket.prependOnceListener)
+  })
 })
 
 // needed for testing
