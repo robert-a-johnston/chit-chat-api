@@ -2,7 +2,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
-const http = require('http')
+// const http = require('http')
 const { Server } = require('socket.io')
 
 // require route files
@@ -24,7 +24,6 @@ const auth = require('./lib/auth')
 // used for cors and local port declaration
 const serverDevPort = 4741
 const clientDevPort = 7165
-
 
 // establish database connection
 // use new version of URL parser
@@ -63,29 +62,23 @@ app.use(exampleRoutes)
 app.use(userRoutes)
 
 // register error handling middleware
-// note that this comes after the route middlewares, because it needs to be
+// note that this comes after the route middleware, because it needs to be
 // passed any error messages from them
 app.use(errorHandler)
 
 // run API on designated port (4741 in this case)
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log('listening on port ' + port)
 })
 
-const server = http.createServer(app)
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:7165',
-    methods: ['GET', 'POST']
+    origin: '*'
   }
 })
 
 io.on('connection', (socket) => {
-  console.log(socket.id)
-
-  socket.on('disconnect', () => {
-    console.log('User Disconnected', socket.prependOnceListener)
-  })
+  console.log('socket id', socket.id)
 })
 
 // needed for testing
