@@ -2,6 +2,8 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
+// const http = require('http')
+const { Server } = require('socket.io')
 
 // require route files
 const exampleRoutes = require('./app/routes/example_routes')
@@ -60,13 +62,23 @@ app.use(exampleRoutes)
 app.use(userRoutes)
 
 // register error handling middleware
-// note that this comes after the route middlewares, because it needs to be
+// note that this comes after the route middleware, because it needs to be
 // passed any error messages from them
 app.use(errorHandler)
 
 // run API on designated port (4741 in this case)
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log('listening on port ' + port)
+})
+
+const io = new Server(server, {
+  cors: {
+    origin: '*'
+  }
+})
+
+io.on('connection', (socket) => {
+  console.log('socket id', socket.id)
 })
 
 // needed for testing
