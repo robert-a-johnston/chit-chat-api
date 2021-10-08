@@ -79,6 +79,23 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
   console.log('socket id', socket.id)
+  // event of joining room from front end
+  socket.on('join_room', (roomData) => {
+    socket.join(roomData)
+    console.log(`Socket with id: ${socket.id} joined room: ${roomData}`)
+  })
+
+  // handles message data sent from server
+  socket.on('send_message', (messageData) => {
+    console.log('messageData from client', messageData)
+    // emits messageData to client to specific room
+    socket.to(messageData.room).emit('receive_message', messageData)
+  })
+
+  // disconnect from socket
+  socket.on('disconnect', () => {
+    console.log('user disconnect', socket.id)
+  })
 })
 
 // needed for testing
