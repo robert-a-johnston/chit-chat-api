@@ -1,9 +1,17 @@
 // require necessary NPM packages
 const express = require('express')
+const app = express()
 const mongoose = require('mongoose')
 const cors = require('cors')
-// const http = require('http')
+const http = require('http')
+const server = http.createServer(app)
 const { Server } = require('socket.io')
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:7165',
+    methods: ['GET', 'POST']
+  }
+})
 
 // require route files
 const exampleRoutes = require('./app/routes/example_routes')
@@ -19,6 +27,7 @@ const db = require('./config/db')
 
 // require configured passport authentication middleware
 const auth = require('./lib/auth')
+const user = require('./app/models/user')
 
 // define server and client ports
 // used for cors and local port declaration
@@ -35,7 +44,7 @@ mongoose.connect(db, {
 })
 
 // instantiate express application object
-const app = express()
+// const app = express()
 
 // set CORS headers on response from this API using the `cors` NPM package
 // `CLIENT_ORIGIN` is an environment variable that will be set on Heroku
@@ -67,28 +76,35 @@ app.use(userRoutes)
 app.use(errorHandler)
 
 // run API on designated port (4741 in this case)
-const server = app.listen(port, () => {
+server.listen(port, () => {
   console.log('listening on port ' + port)
 })
 
-const io = new Server(server, {
-  cors: {
-    origin: 'http://localhost:7165',
-    methods: ['GET', 'POST']
-  }
-})
+let users = []
+// filters users so that they do not keep adding users
+const addUser = (userId, socketId) => {
+  !users.some(user => user.userId === userId) &&
+    users.push({ userId, socketId })
+}
 
 io.on('connection', (socket) => {
   socket.on('join_room', (roomData) => {
     socket.join(roomData)
+    console.log('socket id', socket.id)
+    console.log('name ', roomData.name)
     console.log(`Stringified object joined room: ${JSON.stringify(roomData)}`)
+    addUser(roomData.name, socket.Id)
   })
-
+  // take userID and socket ID sends users to client
+  socket.on('addUser', (userId) => {
+    addUser(userId, socket.Id)
+    io.emit('getUsers', users)
+  })
   // Welcome current user
   socket.emit('message', 'Welcome to chat')
 
   // runs when client joins
-  // socket.broadcast.emit('message', 'A user has joined')
+  socket.broadcast.emit('message', 'A user has joined')
 
   // handles message data sent from server
   socket.on('message', (messageData) => {
