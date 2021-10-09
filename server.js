@@ -73,20 +73,25 @@ const server = app.listen(port, () => {
 
 const io = new Server(server, {
   cors: {
-    origin: '*'
+    origin: 'http://localhost:7165',
+    methods: ['GET', 'POST']
   }
 })
 
 io.on('connection', (socket) => {
-  console.log('socket id', socket.id)
-  // event of joining room from front end
   socket.on('join_room', (roomData) => {
     socket.join(roomData)
-    console.log(`Socket with id: ${socket.id} joined room: ${roomData}`)
+    console.log(`Stringified object joined room: ${JSON.stringify(roomData)}`)
   })
 
+  // Welcome current user
+  socket.emit('message', 'Welcome to chat')
+
+  // runs when client joins
+  // socket.broadcast.emit('message', 'A user has joined')
+
   // handles message data sent from server
-  socket.on('send_message', (messageData) => {
+  socket.on('message', (messageData) => {
     console.log('messageData from client', messageData)
     // emits messageData to client to specific room
     socket.to(messageData.room).emit('receive_message', messageData)
@@ -94,6 +99,7 @@ io.on('connection', (socket) => {
 
   // disconnect from socket
   socket.on('disconnect', () => {
+    socket.emit('message', 'User left')
     console.log('user disconnect', socket.id)
   })
 })
