@@ -93,19 +93,13 @@ io.on('connection', (socket) => {
     console.log('socket id', socket.id)
     console.log('name ', roomData.name)
     console.log(`Stringified object joined room: ${JSON.stringify(roomData)}`)
-    addUser(roomData.name, socket.Id)
+    addUser(roomData.name, socket.id)
   })
   // take userID and socket ID sends users to client
   socket.on('addUser', (userId) => {
     addUser(userId, socket.Id)
     io.emit('getUsers', users)
   })
-  // Welcome current user
-  socket.emit('message', 'Welcome to chat')
-
-  // runs when client joins
-  socket.broadcast.emit('message', 'A user has joined')
-
   // handles message data sent from server
   socket.on('message', (messageData) => {
     console.log('messageData from client', messageData)
