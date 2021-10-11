@@ -83,8 +83,8 @@ server.listen(port, () => {
 let users = []
 // filters users so that they do not keep adding users
 const addUser = (userId, socketId) => {
-  !users.some(user => user.userId === userId) &&
-    users.push({ userId, socketId })
+  console.log('in addUser, id, socketid', userId, socketId)
+  if (!users.some(user => user.userId === userId)) { users.push({socketId, userId}) }
 }
 
 io.on('connection', (socket) => {
