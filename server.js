@@ -84,14 +84,16 @@ let users = []
 // filters users so that they do not keep adding users
 const addUser = (userId, socketId) => {
   console.log('in addUser, id, socketid', userId, socketId)
-  if (!users.some(user => user.userId === userId)) { users.push({socketId, userId}) }
+  if ((!users.some(user => user.userId === userId)) && (socketId !== undefined)) {
+    users.push({userId, socketId})
+  }
 }
 
 io.on('connection', (socket) => {
   socket.on('join_room', (roomData) => {
-    socket.join(roomData)
+    socket.join(roomData.room)
     console.log('socket id', socket.id)
-    console.log('name ', roomData.name)
+    console.log('name ', roomData)
     console.log(`Stringified object joined room: ${JSON.stringify(roomData)}`)
     addUser(roomData.name, socket.id)
   })
@@ -104,7 +106,7 @@ io.on('connection', (socket) => {
   socket.on('message', (messageData) => {
     console.log('messageData from client', messageData)
     // emits messageData to client to specific room
-    socket.to(messageData.room).emit('receive_message', messageData)
+    io.to(messageData.room).emit('receive_message', messageData)
   })
 
   // disconnect from socket
