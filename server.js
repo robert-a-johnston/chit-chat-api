@@ -27,7 +27,7 @@ const db = require('./config/db')
 
 // require configured passport authentication middleware
 const auth = require('./lib/auth')
-const user = require('./app/models/user')
+// const user = require('./app/models/user')
 
 // define server and client ports
 // used for cors and local port declaration
