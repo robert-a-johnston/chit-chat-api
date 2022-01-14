@@ -83,7 +83,7 @@ server.listen(port, () => {
 let users = []
 // filters users so that they do not keep adding users
 const addUser = (userId, socketId) => {
-  console.log('in addUser, id, socketid', userId, socketId)
+  console.log('in addUser, id, socketId', userId, socketId)
   if ((!users.some(user => user.userId === userId)) && (socketId !== undefined)) {
     users.push({userId, socketId})
   }
@@ -105,6 +105,7 @@ io.on('connection', (socket) => {
   // handles message data sent from server
   socket.on('message', (messageData) => {
     console.log('messageData from client', messageData)
+    console.log('room', messageData.room)
     // emits messageData to client to specific room
     io.to(messageData.room).emit('receive_message', messageData)
   })
